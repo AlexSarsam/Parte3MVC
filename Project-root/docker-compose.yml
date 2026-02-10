@@ -1,0 +1,43 @@
+version: "3.8"
+services:
+  app:
+    build: .
+    container_name: mvc_app
+    ports:
+      - "8000:80"
+    depends_on:
+      - db
+    environment:
+      - WEBHOOK_URL=${WEBHOOK_URL:-}
+      - WEBHOOK_SECRET=${WEBHOOK_SECRET:-}
+      - APP_BASE_URL=${APP_BASE_URL:-http://localhost:8000}
+    volumes:
+      - .:/var/www/html
+    
+ 
+  db:
+    image: mysql:8.0
+    container_name: mvc_db
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=blog_db
+      - MYSQL_USER=blog_user
+      - MYSQL_PASSWORD=blog_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./database.sql:/docker-entrypoint-initdb.d/init.sql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: mvc_phpmyadmin
+    environment:
+      - PMA_HOST=db
+      - PMA_USER=blog_user
+      - PMA_PASSWORD=blog_pass
+    ports:
+      - "8081:80"
+
+volumes:
+  db_data:
